@@ -62,20 +62,13 @@ This application integrates several statistical and analytical techniques:
 
 ---
 
-## Design
+## Analytical Framework
 
-Unlike traditional grade predictors, this project was designed as a **decision-support tool**.
+The application approaches academic performance as an input-minimization problem rather than an output-maximization problem.
 
-Instead of answering:
+Instead of asking, *"Given 20 hours of study, what grade can I expect?"* it asks, *"Given a target grade, what is the minimum combination of study time, sleep, attendance, and office hours required to achieve it?"*
 
-> *"What grade will I receive?"*
-
-it answers:
-
-> **"What is the minimum combination of study, sleep, attendance, and office hours required to achieve my desired grade?"**
-
-The resulting decision boundaries allow users to visualize trade-offs between behaviors while exploring how changes in one variable influence the minimum requirements of another.
-
+By estimating decision boundaries, the model distinguishes **necessary** inputs from merely **sufficient** ones, emphasizing efficient allocation of time rather than unnecessary effort.
 ---
 
 ## Repository Contents
