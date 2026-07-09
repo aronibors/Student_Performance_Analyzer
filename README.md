@@ -2,7 +2,7 @@
 
 An interactive **R Shiny** decision-support application that estimates the minimum combination of study time, sleep, class attendance, and office hours required to achieve target academic outcomes.
 
-🌐 **Live Application**  
+ **Live Application**  
 https://aronibors.shinyapps.io/Student_Performance_Analyzer/
 
 ---
