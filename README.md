@@ -1,71 +1,56 @@
-# Student Performance Analyzer (v2.0)
+# Student Performance Analyzer
 
-An interactive **R Shiny** decision-support engine and risk-modeling framework tailored for rigorous, proof-heavy STEM disciplines (Real Analysis, Quantum Mechanics, Theoretical Computer Science). 
+An interactive **R Shiny** decision-support application that estimates the minimum combination of study time, sleep, class attendance, and office hours required to achieve target academic outcomes.
 
-The application pairs non-linear cognitive growth models with multivariate inference and stochastic simulation, allowing students to solve the **inverse optimization problem**: identifying the minimal, necessary resource allocation required to guarantee target academic grades under adverse test-day variance.
-
-🔗 **Live Application**  
-[https://aronibors.shinyapps.io/Student_Performance_Analyzer/](https://aronibors.shinyapps.io/Student_Performance_Analyzer/)
+ **Live Application**  
+https://aronibors.shinyapps.io/Student_Performance_Analyzer/
 
 ---
 
 ## Application Overview
 
-Traditional academic predictors focus on the **forward problem**:
-> *"Given my current habits, what grade can I expect?"*
+The Student Performance Analyzer combines interactive visualization, statistical modeling, and simulation to explore how academic behaviors influence performance.
 
-In rigorous STEM programs, this perspective often leads to inefficient over-studying or unexpected test-day failures due to cognitive exhaustion. The Student Performance Analyzer instead solves the **inverse problem**:
-> *"Given my desired grade and target confidence level, what is the minimum necessary combination of study, sleep, and syllabus coverage required?"*
+Rather than functioning solely as a grade predictor, the application allows users to explore how different combinations of study time, sleep, attendance, office hours, and caffeine consumption influence expected outcomes while visualizing the trade-offs between them.
 
-By distinguishing **necessary conditions** from merely **sufficient effort**, users can identify high-leverage habits, preserve time for rest and competing priorities, and protect their GPA against downside exam-day risk.
+![Student Performance Analyzer](HeatmapDecisionBoundary-png)
 
 ---
-
 ## What’s New in v2.0
 
 - **Vectorized Decision-Boundary Heatmaps:** Re-engineered the underlying 2D evaluation pipeline with vectorized boundary conditions, eliminating dimension-recycling errors across all multi-variable slices (`Study × Coverage`, `Study × Attendance`, `Sleep × Study`).
 - **Interactive Monte Carlo Click-Inspector:** Canvas click-listener capturing real-time $(x, y)$ coordinates to compute empirical grade differentials against expected centroids under stochastic noise ($\sigma = 5.0$).
 - **Multivariate Hypothesis Engine (MANOVA):** Integrated joint-outcome testing using Wilks' Lambda ($\Lambda$) to evaluate shared variance across correlated test scores and homework assignments.
 - **De-cluttered PCA Biplots:** Overhauled cohort principal component projections to focus exclusively on dominant eigenvector loadings and individual habit projections, removing background point noise.
+## Features
+
+- Interactive grade prediction
+- Minimum-input estimation for target grades
+- Decision-boundary heatmaps
+- Monte Carlo simulation
+- Principal Component Analysis (PCA)
+- Multiple Linear Regression
+- MANOVA
+- Correlation analysis
+- Interactive parameter controls
 
 ---
 
-## Analytical Architecture
+## Analytical Framework
 
-text
-                                  +-------------------+
-                                  | Curriculum (Cov%) |
-                                  +---------+---------+
-                                            |
-                                            v (Multiplicative Bottleneck)
-[Sleep (hrs)] ---> (Cognitive Floor)  \ 
-                                       *===> [Usable Mastery] --+
-[Study (hrs)] ---> (Diminishing Return)/                        |
-                                                                +---> [Expected Score]
-[Attendance%] ---> (Direct Linear Exposure) --------------------+     (0 - 100)
-[Office Hrs]  ---> (Concave Support, sqrt)  --------------------+
-[Caffeine]    ---> (Non-linear Jitter/Crash) -------------------+
-```### 1. The Forward Model: Scoring Dynamics Upper-division STEM coursework requires deep quantifier manipulation and conceptual synthesis where rote memorization fails. The scoring engine models these constraints explicitly:
-```
-$$\text{Mastery} = \Big(S_{\text{sleep}} + S_{\text{study}}\Big) \times \left(\frac{\text{Coverage}}{100}\right)$$
+Most predictive models solve the **forward problem**:
 
-$$\text{Expected Score} = \text{Clamp}_{[0, 100]}\Big(10 + \text{Mastery} + T_{\text{attend}} + T_{\text{office}} + T_{\text{caffeine}}\Big)$$
+> **Given a set of inputs, what output can be expected?**
 
-- **The Multiplicative Bottleneck:** Usable mastery is gated by syllabus coverage. No amount of study time or cognitive rest can unlock points on unreviewed theoretical definitions or proofs.
-- **10-Point Baseline Floor:** Calibrated for realistic proof/FRQ exam rubrics—accounting for elementary setup notation, base cases, and definitions while preventing unearned partial credit.
-- **Asymmetric Sleep Saturation:** Incorporates an exponential threshold modeling the severe working-memory loss observed below 4.5 hours of sleep.
+This application instead solves the **inverse problem**:
 
-### 2. The Inverse Problem: Minimum Resource Solver
-The analyzer inverts the scoring function using 1D numerical root-finding (`uniroot`) across user parameters.
+> **Given a desired output, what is the minimum combination of inputs required to achieve it?**
 
-To defend against downside variance, the solver targets an augmented threshold:
+Traditional prediction identifies input combinations that are **sufficient** to produce an outcome. This application instead estimates the **minimum necessary** study time, sleep, attendance, and office hour participation required to achieve each target grade.
 
-$$\text{Target}_{\text{effective}} = \text{Target} + z_{\alpha} \times \sigma$$
-
-where $z_{\alpha} = \Phi^{-1}(1 - \alpha)$ and $\sigma = 5.0\text{ points}$.
+The resulting decision boundaries distinguish **necessary** from merely **sufficient** combinations of academic behaviors, emphasizing efficient allocation of time rather than unnecessary effort. By minimizing required inputs, users can preserve additional time for work, leisure, skill development, or other competing priorities while still achieving their desired academic outcomes.
 
 ---
-
 ## Core Modules & Visualizations
 
 | Module | Statistical Method | Analytical Objective |
@@ -80,26 +65,41 @@ where $z_{\alpha} = \Phi^{-1}(1 - \alpha)$ and $\sigma = 5.0\text{ points}$.
 
 ---
 
-## Tech Stack & Dependencies
 
-- **Language:** R (>= 4.0.0)
-- **Framework:** Shiny
-- **Visualization:** ggplot2
-- **Statistical Computing:** stats` (`prcomp`, `manova`, `lm`, `uniroot`, `rnorm`)
-```
+## Statistical Methods
+
+This application integrates multiple analytical techniques:
+
+- Principal Component Analysis (PCA)
+- Multiple Linear Regression
+- MANOVA
+- Monte Carlo Simulation
+- Correlation Analysis
+- Nonlinear predictive modeling
+- Root-finding algorithms for minimum-input estimation
+- Decision-boundary visualization
+
 ---
-```
-## Local Setup & Installation
 
-To run the application locally:
-```
-```
-# 1. Clone the repository git clone [https://github.com/aronibors/Student_Performance_Analyzer.git](https://github.com/aronibors/Student_Performance_Analyzer.git)
-```r# 2. Install dependencies- install.packages(c("shiny", "ggplot2"))
-```
-# 3. Launch application
-shiny::runApp("Student_Performance_Analyzer.R")
+## Libraries
 
+- R
+- Shiny
+- ggplot2
+- dplyr
+- corrplot
+- broom
+- metR
+
+---
+
+## Repository Contents
+
+- `Student_Performance_Analyzer.R` — Complete R Shiny application source code
+- `README.md` — Project documentation
+- `LICENSE` — GNU General Public License v3.0 (GPL-3.0)
+
+---
 ## License
 
 This project is licensed under the [GNU General Public License v3.0 (GPL-3.0)](https://www.gnu.org/licenses/gpl-3.0.en.html).
@@ -112,3 +112,4 @@ This project is licensed under the [GNU General Public License v3.0 (GPL-3.0)](h
 
 - **LinkedIn:** [aron-bors-066679237](https://www.linkedin.com/in/aron-bors-066679237/)
 - **GitHub:** [@aronibors](https://github.com/aronibors)
+
