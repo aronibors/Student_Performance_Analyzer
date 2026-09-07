@@ -1,92 +1,118 @@
-# Student Performance Analyzer
+# Student Performance Analyzer (v2.0)
 
-An interactive **R Shiny** decision-support application that estimates the minimum combination of study time, sleep, class attendance, and office hours required to achieve target academic outcomes.
+An interactive **R Shiny** decision-support engine and risk-modeling framework tailored for rigorous, proof-heavy STEM disciplines (Real Analysis, Quantum Mechanics, Theoretical Computer Science). 
 
- **Live Application**  
+The application pairs non-linear cognitive growth models with multivariate inference and stochastic simulation, allowing students to solve the **inverse optimization problem**: identifying the minimal, necessary resource allocation required to guarantee target academic grades under adverse test-day variance.
+
+🔗 **Live Application**  
 https://aronibors.shinyapps.io/Student_Performance_Analyzer/
 
 ---
 
 ## Application Overview
 
-The Student Performance Analyzer combines interactive visualization, statistical modeling, and simulation to explore how academic behaviors influence performance.
+Traditional academic predictors focus on the **forward problem**:
+> *"Given my current habits, what grade can I expect?"*
 
-Rather than functioning solely as a grade predictor, the application allows users to explore how different combinations of study time, sleep, attendance, office hours, and caffeine consumption influence expected outcomes while visualizing the trade-offs between them.
+In rigorous STEM programs, this perspective often leads to inefficient over-studying or unexpected test-day failures due to cognitive exhaustion. The Student Performance Analyzer instead solves the **inverse problem**:
+> *"Given my desired grade and target confidence level, what is the minimum necessary combination of study, sleep, and syllabus coverage required?"*
 
-![Student Performance Analyzer](HeatmapDecisionBoundary-png)
-
----
-
-## Features
-
-- Interactive grade prediction
-- Minimum-input estimation for target grades
-- Decision-boundary heatmaps
-- Monte Carlo simulation
-- Principal Component Analysis (PCA)
-- Multiple Linear Regression
-- MANOVA
-- Correlation analysis
-- Interactive parameter controls
+By distinguishing **necessary conditions** from merely **sufficient effort**, users can identify high-leverage habits, preserve time for rest and competing priorities, and protect their GPA against downside exam-day risk.
 
 ---
 
-## Analytical Framework
+## What’s New in v2.0
 
-Most predictive models solve the **forward problem**:
-
-> **Given a set of inputs, what output can be expected?**
-
-This application instead solves the **inverse problem**:
-
-> **Given a desired output, what is the minimum combination of inputs required to achieve it?**
-
-Traditional prediction identifies input combinations that are **sufficient** to produce an outcome. This application instead estimates the **minimum necessary** study time, sleep, attendance, and office hour participation required to achieve each target grade.
-
-The resulting decision boundaries distinguish **necessary** from merely **sufficient** combinations of academic behaviors, emphasizing efficient allocation of time rather than unnecessary effort. By minimizing required inputs, users can preserve additional time for work, leisure, skill development, or other competing priorities while still achieving their desired academic outcomes.
+- **Vectorized Decision-Boundary Heatmaps:** Re-engineered the underlying 2D evaluation pipeline with vectorized boundary conditions, eliminating dimension-recycling errors across all multi-variable slices (`Study × Coverage`, `Study × Attendance`, `Sleep × Study`).
+- **Interactive Monte Carlo Click-Inspector:** Canvas click-listener capturing real-time $(x, y)$ coordinates to compute empirical grade differentials against expected centroids under stochastic noise ($\sigma = 5.0$).
+- **Multivariate Hypothesis Engine (MANOVA):** Integrated joint-outcome testing using Wilks' Lambda ($\Lambda$) to evaluate shared variance across correlated test scores and homework assignments.
+- **De-cluttered PCA Biplots:** Overhauled cohort principal component projections to focus exclusively on dominant eigenvector loadings and individual habit projections, removing background point noise.
 
 ---
 
-## Statistical Methods
+## Analytical Architecture
+### 1. The Forward Model: Scoring Dynamics
+Upper-division STEM coursework requires deep quantifier manipulation and conceptual synthesis where rote memorization fails. The scoring engine models these constraints explicitly:
 
-This application integrates multiple analytical techniques:
+$$\text{Mastery} = \Big(S_{\text{sleep}} + S_{\text{study}}\Big) \times \left(\frac{\text{Coverage}}{100}\right)$$
 
-- Principal Component Analysis (PCA)
-- Multiple Linear Regression
-- MANOVA
-- Monte Carlo Simulation
-- Correlation Analysis
-- Nonlinear predictive modeling
-- Root-finding algorithms for minimum-input estimation
-- Decision-boundary visualization
+$$\text{Expected Score} = \text{Clamp}_{[0, 100]}\Big(10 + \text{Mastery} + T_{\text{attend}} + T_{\text{office}} + T_{\text{caffeine}}\Big)$$
 
----
+- **The Multiplicative Bottleneck:** Usable mastery is gated by syllabus coverage. No amount of study time or cognitive rest can unlock points on unreviewed theoretical definitions or proofs.
+- **10-Point Baseline Floor:** Calibrated for realistic proof/FRQ exam rubrics—accounting for elementary setup notation, base cases, and definitions while preventing unearned partial credit.
+- **Asymmetric Sleep Saturation:** Incorporates an exponential threshold modeling the severe working-memory loss observed below 4.5 hours of sleep.
 
-## Technologies
+### 2. The Inverse Problem: Minimum Resource Solver
+The analyzer inverts the scoring function using 1D numerical root-finding (`uniroot`) across user parameters.
 
-- R
-- Shiny
-- ggplot2
-- dplyr
-- GGally
-- factoextra
-- corrplot
-- broom
-- metR
+To defend against downside variance, the solver targets an augmented threshold:
+$$\text{Target}_{\text{effective}} = \text{Target} + z_{\alpha} \times \sigma$$
+where $z_{\alpha} = \Phi^{-1}(1 - \alpha)$ and $\sigma = 5.0\text{ points}$.
 
 ---
 
-## Repository Contents
+## Core Modules & Visualizations
+---
 
-- `Student_Performance_Analyzer.R` — Complete R Shiny application source code
-- `README.md` — Project documentation
-- `LICENSE` — GNU General Public License v3.0 (GPL-3.0)
+### 2. How to Format the Analytical Architecture Diagram
+
+ASCII art and flowcharts need a fixed-width, monospaced environment so the vertical lines (`|`) and arrows (`--->`) do not collapse. Enclose the entire diagram in a generic code block using triple backticks:
+
+
+## Analytical Architecture
+
+
+                                  +-------------------+
+                                  | Curriculum (Cov%) |
+                                  +---------+---------+
+                                            |
+                                            v (Multiplicative Bottleneck)
+[Sleep (hrs)] ---> (Cognitive Floor)  \ 
+                                       *===> [Usable Mastery] --+
+[Study (hrs)] ---> (Diminishing Return)/                        |
+                                                                +---> [Expected Score]
+[Attendance%] ---> (Direct Linear Exposure) --------------------+     (0 - 100)
+[Office Hrs]  ---> (Concave Support, sqrt)  --------------------+
+[Caffeine]    ---> (Non-linear Jitter/Crash) -------------------+
+
+| Module | Statistical Method | Analytical Objective |
+| :--- | :--- | :--- |
+| **Predictions & Floor** | Parametric Cutoffs ($z$-score) | Projects mean expected score vs. guaranteed conservative floor at $80\%\text{--}99.5\%$ confidence. |
+| **Minimum Needed** | Numerical Root-Finding (`uniroot`) | Computes exact minimum thresholds for Sleep, Study, and Coverage needed to secure grades A through D. |
+| **Decision Heatmaps** | Iso-Score Contour Mapping (`geom_tile`) | Visualizes orthogonal 2D trade-offs and non-linear contour boundaries across behavioral pairs. |
+| **Monte Carlo Risk** | Stochastic Sampling ($\mathcal{N}(0, 5^2)$) | Simulates $N \in [200, 5000]$ exam scenarios with 2D kernel density rings and interactive click diagnostics. |
+| **Cohort PCA** | SVD / Eigenvector Decomposition | Projects 6D habit vectors onto the primary 2D principal component plane ($\sim 37\%$ cohort variance). |
+| **MANOVA** | Wilks' Lambda ($\Lambda$) Estimation | Quantifies the generalized variance of joint outcomes ($\mathbf{Y} = [\text{TestScore}, \text{Homework}]^T$). |
+| **Feature Correlations** | Pearson Correlation Matrix | Evaluates collinearity and verifies input orthogonality across generated cohorts. |
 
 ---
 
-## Author
+## Tech Stack & Dependencies
 
-**Aron Bors**
+- **Language:** R (>= 4.0.0)
+- **Framework:** Shiny
+- **Visualization:** `ggplot2`
+- **Statistical Computing:** `stats` (`prcomp`, `manova`, `lm`, `uniroot`, `rnorm`)
 
-- LinkedIn: https://www.linkedin.com/in/aron-bors-066679237
-- GitHub: https://github.com/aronibors
+---
+
+## Local Setup & Installation
+
+To run the application locally:
+1. Clone the repository
+git clone [https://github.com/aronibors/Student_Performance_Analyzer.git](https://github.com/aronibors/Student_Performance_Analyzer.git)
+
+# 2. Install dependencies
+install.packages(c("shiny", "ggplot2"))
+
+# 3. Launch application
+shiny::runApp("Student_Performance_Analyzer.R")
+License
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0).
+
+Author
+Aron Bors
+
+LinkedIn: aron-bors-066679237
+
+GitHub: @aronibors
