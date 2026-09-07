@@ -5,7 +5,7 @@ An interactive **R Shiny** decision-support engine and risk-modeling framework t
 The application pairs non-linear cognitive growth models with multivariate inference and stochastic simulation, allowing students to solve the **inverse optimization problem**: identifying the minimal, necessary resource allocation required to guarantee target academic grades under adverse test-day variance.
 
 🔗 **Live Application**  
-https://aronibors.shinyapps.io/Student_Performance_Analyzer/
+[https://aronibors.shinyapps.io/Student_Performance_Analyzer/](https://aronibors.shinyapps.io/Student_Performance_Analyzer/)
 
 ---
 
@@ -31,6 +31,21 @@ By distinguishing **necessary conditions** from merely **sufficient effort**, us
 ---
 
 ## Analytical Architecture
+text
+```
+                                  +-------------------+
+                                  | Curriculum (Cov%) |
+                                  +---------+---------+
+                                            |
+                                            v (Multiplicative Bottleneck)
+[Sleep (hrs)] ---> (Cognitive Floor)  \ 
+                                       *===> [Usable Mastery] --+
+[Study (hrs)] ---> (Diminishing Return)/                        |
+                                                                +---> [Expected Score]
+[Attendance%] ---> (Direct Linear Exposure) --------------------+     (0 - 100)
+[Office Hrs]  ---> (Concave Support, sqrt)  --------------------+
+[Caffeine]    ---> (Non-linear Jitter/Crash) -------------------+
+```
 ### 1. The Forward Model: Scoring Dynamics
 Upper-division STEM coursework requires deep quantifier manipulation and conceptual synthesis where rote memorization fails. The scoring engine models these constraints explicitly:
 
@@ -46,34 +61,14 @@ $$\text{Expected Score} = \text{Clamp}_{[0, 100]}\Big(10 + \text{Mastery} + T_{\
 The analyzer inverts the scoring function using 1D numerical root-finding (`uniroot`) across user parameters.
 
 To defend against downside variance, the solver targets an augmented threshold:
+
 $$\text{Target}_{\text{effective}} = \text{Target} + z_{\alpha} \times \sigma$$
+
 where $z_{\alpha} = \Phi^{-1}(1 - \alpha)$ and $\sigma = 5.0\text{ points}$.
 
 ---
 
 ## Core Modules & Visualizations
----
-
-### 2. How to Format the Analytical Architecture Diagram
-
-ASCII art and flowcharts need a fixed-width, monospaced environment so the vertical lines (`|`) and arrows (`--->`) do not collapse. Enclose the entire diagram in a generic code block using triple backticks:
-
-
-## Analytical Architecture
-
-
-                                  +-------------------+
-                                  | Curriculum (Cov%) |
-                                  +---------+---------+
-                                            |
-                                            v (Multiplicative Bottleneck)
-[Sleep (hrs)] ---> (Cognitive Floor)  \ 
-                                       *===> [Usable Mastery] --+
-[Study (hrs)] ---> (Diminishing Return)/                        |
-                                                                +---> [Expected Score]
-[Attendance%] ---> (Direct Linear Exposure) --------------------+     (0 - 100)
-[Office Hrs]  ---> (Concave Support, sqrt)  --------------------+
-[Caffeine]    ---> (Non-linear Jitter/Crash) -------------------+
 
 | Module | Statistical Method | Analytical Objective |
 | :--- | :--- | :--- |
@@ -99,20 +94,23 @@ ASCII art and flowcharts need a fixed-width, monospaced environment so the verti
 ## Local Setup & Installation
 
 To run the application locally:
-1. Clone the repository
-git clone [https://github.com/aronibors/Student_Performance_Analyzer.git](https://github.com/aronibors/Student_Performance_Analyzer.git)
-
+```bash # 1. Clone the repository git clone [https://github.com/aronibors/Student_Performance_Analyzer.git](https://github.com/aronibors/Student_Performance_Analyzer.git)
+```
 # 2. Install dependencies
 install.packages(c("shiny", "ggplot2"))
 
 # 3. Launch application
 shiny::runApp("Student_Performance_Analyzer.R")
-License
-This project is licensed under the GNU General Public License v3.0 (GPL-3.0).
 
-Author
-Aron Bors
+## License
 
-LinkedIn: aron-bors-066679237
+This project is licensed under the [GNU General Public License v3.0 (GPL-3.0)](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
-GitHub: @aronibors
+---
+
+## Author
+
+**Aron Bors**
+
+- **LinkedIn:** [aron-bors-066679237](https://www.linkedin.com/in/aron-bors-066679237/)
+- **GitHub:** [@aronibors](https://github.com/aronibors)
