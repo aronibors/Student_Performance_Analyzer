@@ -13,7 +13,7 @@ The Student Performance Analyzer combines interactive visualization, statistical
 
 Rather than functioning solely as a grade predictor, the application allows users to explore how different combinations of study time, sleep, attendance, office hours, and caffeine consumption influence expected outcomes while visualizing the trade-offs between them.
 
-![Student Performance Analyzer](HeatmapDecisionBoundary-png)
+![Student Performance Analyzer](HeatMapDecisionBoundaryUpdate-png)
 
 ---
 ## What’s New in v2.0
