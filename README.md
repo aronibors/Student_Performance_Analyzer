@@ -31,8 +31,8 @@ By distinguishing **necessary conditions** from merely **sufficient effort**, us
 ---
 
 ## Analytical Architecture
+
 text
-```
                                   +-------------------+
                                   | Curriculum (Cov%) |
                                   +---------+---------+
@@ -45,10 +45,8 @@ text
 [Attendance%] ---> (Direct Linear Exposure) --------------------+     (0 - 100)
 [Office Hrs]  ---> (Concave Support, sqrt)  --------------------+
 [Caffeine]    ---> (Non-linear Jitter/Crash) -------------------+
+```### 1. The Forward Model: Scoring Dynamics Upper-division STEM coursework requires deep quantifier manipulation and conceptual synthesis where rote memorization fails. The scoring engine models these constraints explicitly:
 ```
-### 1. The Forward Model: Scoring Dynamics
-Upper-division STEM coursework requires deep quantifier manipulation and conceptual synthesis where rote memorization fails. The scoring engine models these constraints explicitly:
-
 $$\text{Mastery} = \Big(S_{\text{sleep}} + S_{\text{study}}\Big) \times \left(\frac{\text{Coverage}}{100}\right)$$
 
 $$\text{Expected Score} = \text{Clamp}_{[0, 100]}\Big(10 + \text{Mastery} + T_{\text{attend}} + T_{\text{office}} + T_{\text{caffeine}}\Big)$$
@@ -86,19 +84,19 @@ where $z_{\alpha} = \Phi^{-1}(1 - \alpha)$ and $\sigma = 5.0\text{ points}$.
 
 - **Language:** R (>= 4.0.0)
 - **Framework:** Shiny
-- **Visualization:** `ggplot2`
-- **Statistical Computing:** `stats` (`prcomp`, `manova`, `lm`, `uniroot`, `rnorm`)
-
+- **Visualization:** ggplot2
+- **Statistical Computing:** stats` (`prcomp`, `manova`, `lm`, `uniroot`, `rnorm`)
+```
 ---
-
+```
 ## Local Setup & Installation
 
 To run the application locally:
-```bash # 1. Clone the repository git clone [https://github.com/aronibors/Student_Performance_Analyzer.git](https://github.com/aronibors/Student_Performance_Analyzer.git)
 ```
-# 2. Install dependencies
-install.packages(c("shiny", "ggplot2"))
-
+```
+# 1. Clone the repository git clone [https://github.com/aronibors/Student_Performance_Analyzer.git](https://github.com/aronibors/Student_Performance_Analyzer.git)
+```r# 2. Install dependencies- install.packages(c("shiny", "ggplot2"))
+```
 # 3. Launch application
 shiny::runApp("Student_Performance_Analyzer.R")
 
