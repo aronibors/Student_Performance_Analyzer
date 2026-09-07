@@ -7,8 +7,7 @@ library(factoextra)
 library(corrplot)
 library(broom)
 library(rsconnect)
-library(packrat)
-library(metR)
+
 set.seed(42)
 
 # ==== Nonlinear scoring function ====
@@ -24,7 +23,7 @@ score_fun <- function(sleep, study, attend, office, caffeine) {
   raw <- 10 + (sleep_term + study_term) * attend_factor + attend_term + office_term + caffeine_term
   
   # attendance = 0 → fail cap
-  raw[attend == 0] <- 30
+  raw <- ifelse(attend == 0, 30, raw)
   
   pmin(pmax(raw, 0), 100)
 }
@@ -55,6 +54,9 @@ ui <- fluidPage(
       sliderInput("ClassAttend", "Class Attendance (%):",    0, 100, 75),
       sliderInput("OfficeHours", "Office Hours Attendance:", 0, 100, 20),
       sliderInput("Caffeine",    "Caffeine (mg):",           0, 400, 100, step=10),
+      hr(),
+      sliderInput("Confidence",  "Guarantee Confidence Level (%):",
+                  min = 80, max = 99.5, value = 95, step = 0.5, post = "%"),
       numericInput("nSim",       "Monte Carlo Simulations:", 1000, min=200, max=5000, step=100)
     ),
     mainPanel(
@@ -100,11 +102,22 @@ server <- function(input, output) {
     s <- user_data()
     test <- score_fun(s$Sleep, s$Study, s$ClassAttend, s$OfficeHours, s$Caffeine)
     hw   <- score_fun(s$Sleep, s$Study, s$ClassAttend, s$OfficeHours, s$Caffeine/2)
-    cat("Predicted Test Score:", round(test,1), "-", as.character(grade_letter(test)),"\n")
-    cat("Predicted Homework:",   round(hw,1),   "-", as.character(grade_letter(hw)),"\n")
+    
+    # Standard deviation in the synthetic model is 5
+    sigma <- 5
+    z <- qnorm(input$Confidence / 100)
+    lower_bound_test <- pmax(0, test - z * sigma)
+    lower_bound_hw   <- pmax(0, hw - z * sigma)
+    
+    cat("--- Expected Values (50% average) ---\n")
+    cat("Predicted Test Score:", round(test, 1), "-", as.character(grade_letter(test)), "\n")
+    cat("Predicted Homework:  ", round(hw, 1),   "-", as.character(grade_letter(hw)), "\n\n")
+    cat(paste0("--- At ", input$Confidence, "% Statistical Confidence Guaranteed ---\n"))
+    cat("Minimum Expected Test Score:", round(lower_bound_test, 1), "-", as.character(grade_letter(lower_bound_test)), "\n")
+    cat("Minimum Expected Homework:  ", round(lower_bound_hw, 1),   "-", as.character(grade_letter(lower_bound_hw)), "\n")
   })
   
-  # Minimum Needed
+  # Minimum Needed Solver with Confidence Safety Margin
   safe_root <- function(f, lo, hi, target){
     flo <- f(lo) - target; fhi <- f(hi) - target
     if (is.na(flo) || is.na(fhi) || flo * fhi > 0) return(NA_real_)
@@ -112,18 +125,43 @@ server <- function(input, output) {
   }
   
   output$requirements <- renderPrint({
-    s <- user_data(); targets <- c(60,70,80,90)
-    req_study <- sapply(targets, function(T){
+    s <- user_data()
+    targets <- c(60, 70, 80, 90)
+    grade_names <- c("D (60%)", "C (70%)", "B (80%)", "A (90%)")
+    
+    # Calculate required safety buffer based on confidence level
+    sigma <- 5
+    z <- qnorm(input$Confidence / 100)
+    buffer <- z * sigma
+    
+    cat(paste0("=== Absolute Minimums Needed to Guarantee Grades at ", input$Confidence, "% Confidence ===\n"))
+    cat(paste0("(Includes a statistical buffer of +", round(buffer, 1), " pts to protect against random variance)\n\n"))
+    
+    req_study <- sapply(targets, function(base_target){
+      effective_target <- base_target + buffer
+      if (effective_target > 100) return("Impossible (>100 score required)")
+      
       f <- function(study) score_fun(s$Sleep, study, s$ClassAttend, s$OfficeHours, s$Caffeine)
-      val <- safe_root(f, 0, 20, T); ifelse(is.na(val), NA, round(val,2))
+      val <- safe_root(f, 0, 20, effective_target)
+      if (is.na(val)) "Impossible with current sleep/attendance" else paste0(round(val, 2), " h")
     })
-    req_sleep <- sapply(targets, function(T){
+    
+    req_sleep <- sapply(targets, function(base_target){
+      effective_target <- base_target + buffer
+      if (effective_target > 100) return("Impossible (>100 score required)")
+      
       f <- function(sleep) score_fun(sleep, s$Study, s$ClassAttend, s$OfficeHours, s$Caffeine)
-      val <- safe_root(f, 3, 12, T); ifelse(is.na(val), NA, round(val,2))
+      val <- safe_root(f, 3, 12, effective_target)
+      if (is.na(val)) "Impossible with current study/attendance" else paste0(round(val, 2), " h")
     })
-    names(req_study) <- names(req_sleep) <- paste0(c("D","C","B","A"), " (",targets,"%)")
-    cat("At Sleep =", s$Sleep, "h → Required Study (h):\n"); print(req_study)
-    cat("\nAt Study =", s$Study, "h → Required Sleep (h):\n"); print(req_sleep)
+    
+    names(req_study) <- names(req_sleep) <- grade_names
+    
+    cat("Holding Sleep at", s$Sleep, "hours -> Minimum Study Hours needed:\n")
+    print(as.data.frame(req_study))
+    
+    cat("\nHolding Study at", s$Study, "hours -> Minimum Sleep Hours needed:\n")
+    print(as.data.frame(req_sleep))
   })
   
   # Heatmap Sleep × Study
@@ -186,7 +224,7 @@ server <- function(input, output) {
   })
   
   # PCA biplot
-  pca_model <- prcomp(scale(data[,c("Sleep","Study","ClassAttend","OfficeHours","Caffeine")]))
+  pca_model <- prcomp(data[, c("Sleep", "Study", "ClassAttend", "OfficeHours", "Caffeine")], scale. = TRUE, center = TRUE)
   output$biplot <- renderPlot({
     scores_user <- as.data.frame(predict(pca_model, newdata = user_data()))
     fviz_pca_biplot(pca_model, repel=TRUE, col.var="blue") +
@@ -204,10 +242,10 @@ server <- function(input, output) {
   })
   
   # MANOVA
-  output$manova_text <- renderPrint{
-    m <- manova(cbind(TestScore,Homework) ~ Sleep+Study+ClassAttend+OfficeHours+Caffeine, data=data)
-    summary(m, test="Wilks"
-  )}
+  output$manova_text <- renderPrint({
+    m <- manova(cbind(TestScore, Homework) ~ Sleep + Study + ClassAttend + OfficeHours + Caffeine, data = data)
+    summary(m, test = "Wilks")
+  })
   
   # Correlations
   output$corrplot <- renderPlot({
